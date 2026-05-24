@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>停车缴费 - 武汉依云华府</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* 顶部导航栏 */
+        .header {
+            background: linear-gradient(135deg, #1a73e8, #0d47a1);
+            color: white;
+            padding: 16px 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .header .subtitle {
+            font-size: 12px;
+            opacity: 0.85;
+            margin-top: 4px;
+        }
+
+        /* 主内容区 */
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px 16px;
+        }
+
+        /* 停车场信息卡片 */
+        .park-info {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .park-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #1a73e8, #42a5f5);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .park-icon svg {
+            width: 28px;
+            height: 28px;
+            fill: white;
+        }
+
+        .park-details {
+            flex: 1;
+        }
+
+        .park-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .park-tel {
+            font-size: 13px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .park-tel a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+
+        /* 车牌输入区域 */
+        .plate-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .plate-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .plate-label::before {
+            content: '';
+            width: 3px;
+            height: 16px;
+            background: #1a73e8;
+            border-radius: 2px;
+        }
+
+        /* 车牌类型选择 */
+        .plate-type {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .plate-type-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .plate-type-btn.active {
+            border-color: #1a73e8;
+            color: #1a73e8;
+            background: #e8f0fe;
+        }
+
+        /* 车牌输入框 */
+        .plate-input-wrapper {
+            position: relative;
+        }
+
+        .plate-input {
+            width: 100%;
+            height: 52px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-align: center;
+            color: #1a1a1a;
+            background: #fafafa;
+            transition: border-color 0.2s;
+            text-transform: uppercase;
+        }
+
+        .plate-input:focus {
+            outline: none;
+            border-color: #1a73e8;
+            background: white;
+        }
+
+        .plate-input::placeholder {
+            font-size: 14px;
+            font-weight: 400;
+            letter-spacing: 1px;
+            color: #bbb;
+        }
+
+        .plate-clear {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: #ddd;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: white;
+        }
+
+        .plate-clear.visible {
+            display: flex;
+        }
+
+        /* 快捷车牌 */
+        .saved-plates {
+            margin-top: 16px;
+        }
+
+        .saved-plates-title {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .saved-plates-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .saved-plate-tag {
+            padding: 8px 14px;
+            background: #f0f4ff;
+            border: 1px solid #d0deff;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: #1a73e8;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .saved-plate-tag:active {
+            background: #d0deff;
+        }
+
+        .add-plate-tag {
+            padding: 8px 14px;
+            background: #f5f5f5;
+            border: 1px dashed #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #999;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        /* 查询按钮 */
+        .query-btn {
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(135deg, #1a73e8, #0d47a1);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+        }
+
+        .query-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 6px rgba(26, 115, 232, 0.3);
+        }
+
+        .query-btn:disabled {
+            background: #b0bec5;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* 温馨提示 */
+        .tips {
+            background: #fff8e1;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .tips-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .tips-text {
+            font-size: 13px;
+            color: #f57c00;
+            line-height: 1.6;
+        }
+
+        /* 查询结果区域 */
+        .result-section {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .result-section.visible {
+            display: block;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .result-header {
+            background: linear-gradient(135deg, #1a73e8, #42a5f5);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .result-plate {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            margin-bottom: 8px;
+        }
+
+        .result-status {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .result-body {
+            padding: 20px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-row-label {
+            font-size: 14px;
+            color: #888;
+        }
+
+        .result-row-value {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .result-fee {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .result-fee-label {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .result-fee-amount {
+            font-size: 36px;
+            font-weight: 700;
+            color: #e53935;
+        }
+
+        .result-fee-amount .unit {
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .pay-btn {
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(135deg, #e53935, #c62828);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            cursor: pointer;
+            margin-top: 16px;
+            box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3);
+            transition: all 0.2s;
+        }
+
+        .pay-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* iframe 缴费页面 */
+        .pay-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 300;
+            background: #f5f7fa;
+            flex-direction: column;
+        }
+
+        .pay-overlay.visible {
+            display: flex;
+        }
+
+        .pay-overlay-header {
+            background: linear-gradient(135deg, #1a73e8, #0d47a1);
+            color: white;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .pay-overlay-back {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .pay-overlay-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .pay-overlay-body {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pay-overlay-body iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .pay-overlay-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            z-index: 10;
+        }
+
+        .pay-overlay-loading.hidden {
+            display: none;
+        }
+
+        .pay-overlay-loading .spinner {
+            margin-bottom: 12px;
+        }
+
+        .pay-overlay-loading p {
+            font-size: 14px;
+            color: #888;
+        }
+
+        /* iframe 加载失败提示 */
+        .iframe-fallback {
+            display: none;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .iframe-fallback.visible {
+            display: block;
+        }
+
+        .fallback-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .fallback-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .fallback-desc {
+            font-size: 13px;
+            color: #888;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .fallback-methods {
+            text-align: left;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .fallback-method {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .fallback-method:last-child {
+            border-bottom: none;
+        }
+
+        .fallback-method-num {
+            width: 22px;
+            height: 22px;
+            background: #1a73e8;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .fallback-method-text {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .fallback-method-text strong {
+            color: #333;
+        }
+
+        .fallback-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .fallback-btn {
+            width: 100%;
+            height: 46px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .fallback-btn-primary {
+            background: linear-gradient(135deg, #1a73e8, #0d47a1);
+            color: white;
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+        }
+
+        .fallback-btn-secondary {
+            background: white;
+            color: #1a73e8;
+            border: 2px solid #1a73e8;
+        }
+
+        .copy-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        /* 无结果 */
+        .no-result {
+            text-align: center;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .no-result-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .no-result-text {
+            font-size: 15px;
+            color: #888;
+            line-height: 1.6;
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .loading.visible {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e0e0e0;
+            border-top-color: #1a73e8;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 14px;
+            color: #888;
+        }
+
+        /* 底部信息 */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #bbb;
+        }
+
+        /* 车牌键盘 */
+        .keyboard-overlay {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #d2d5db;
+            z-index: 200;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .keyboard-overlay.visible {
+            display: block;
+        }
+
+        .keyboard-header {
+            background: #e8eaed;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .keyboard-done {
+            padding: 6px 16px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .keyboard-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 4px;
+            padding: 4px;
+        }
+
+        .keyboard-grid.province {
+            grid-template-columns: repeat(10, 1fr);
+        }
+
+        .keyboard-grid.alphanumeric {
+            grid-template-columns: repeat(10, 1fr);
+        }
+
+        .key {
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: background 0.1s;
+        }
+
+        .key:active {
+            background: #c8cdd3;
+        }
+
+        .key.wide {
+            font-size: 14px;
+        }
+
+        .key.delete {
+            background: #e8eaed;
+            font-size: 14px;
+        }
+
+        .key.new-energy {
+            background: #1a73e8;
+            color: white;
+            font-size: 12px;
+        }
+
+        /* 隐藏原生键盘 */
+        input[type="text"]:focus {
+            -webkit-user-select: none;
+        }
+
+        input[type="text"] {
+            -webkit-user-select: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部导航 -->
+    <div class="header">
+        <h1>🅿️ 停车缴费</h1>
+        <div class="subtitle">武汉依云华府</div>
+    </div>
+
+    <div class="container">
+        <!-- 停车场信息 -->
+        <div class="park-info">
+            <div class="park-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+            </div>
+            <div class="park-details">
+                <div class="park-name">武汉依云华府</div>
+                <div class="park-tel">📞 <a href="tel:027-65563560">027-65563560</a></div>
+            </div>
+        </div>
+
+        <!-- 温馨提示 -->
+        <div class="tips">
+            <span class="tips-icon">⚠️</span>
+            <span class="tips-text">缴费后，请在 <strong>15分钟内</strong> 离场，超时将重新计费。</span>
+        </div>
+
+        <!-- 车牌输入 -->
+        <div class="plate-section">
+            <div class="plate-label">输入车牌号码</div>
+
+            <!-- 车牌类型 -->
+            <div class="plate-type">
+                <button class="plate-type-btn active" data-type="blue" onclick="setPlateType('blue')">
+                    🔵 普通车牌
+                </button>
+                <button class="plate-type-btn" data-type="green" onclick="setPlateType('green')">
+                    🟢 新能源车牌
+                </button>
+            </div>
+
+            <!-- 车牌输入框 -->
+            <div class="plate-input-wrapper">
+                <input type="text" class="plate-input" id="plateInput" placeholder="请输入车牌号" readonly onclick="showKeyboard()" maxlength="8">
+                <button class="plate-clear" id="clearBtn" onclick="clearPlate()">✕</button>
+            </div>
+
+            <!-- 已保存的车牌 -->
+            <div class="saved-plates" id="savedPlates">
+                <div class="saved-plates-title">常用车牌</div>
+                <div class="saved-plates-list" id="savedPlatesList">
+                    <!-- 动态生成 -->
+                </div>
+            </div>
+
+            <!-- 查询按钮 -->
+            <button class="query-btn" id="queryBtn" onclick="queryParkingFee()">查询停车费</button>
+        </div>
+
+        <!-- 加载中 -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div class="loading-text">正在查询停车费用...</div>
+        </div>
+
+        <!-- 查询结果 -->
+        <div class="result-section" id="resultSection">
+            <!-- 动态填充 -->
+        </div>
+
+        <!-- 底部 -->
+        <div class="footer">
+            CM PARK 招商享停车 · 快捷查询工具
+        </div>
+    </div>
+
+    <!-- 缴费页面 iframe 覆盖层 -->
+    <div class="pay-overlay" id="payOverlay">
+        <div class="pay-overlay-header">
+            <button class="pay-overlay-back" onclick="closePayOverlay()">←</button>
+            <div class="pay-overlay-title">停车缴费</div>
+        </div>
+        <div class="pay-overlay-body">
+            <div class="pay-overlay-loading" id="payLoading">
+                <div class="spinner"></div>
+                <p>正在加载缴费页面...</p>
+            </div>
+            <iframe id="payIframe" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation" onload="onIframeLoad()" onerror="onIframeError()"></iframe>
+            <div class="iframe-fallback" id="iframeFallback">
+                <div class="fallback-icon">😔</div>
+                <div class="fallback-title">页面无法在此环境加载</div>
+                <div class="fallback-desc">
+                    CM PARK 缴费系统需要在微信环境中运行<br>
+                    请选择以下方式完成缴费
+                </div>
+                <div class="fallback-methods">
+                    <div class="fallback-method">
+                        <div class="fallback-method-num">1</div>
+                        <div class="fallback-method-text">
+                            <strong>在微信中打开（推荐）</strong><br>
+                            点击下方按钮复制链接，到微信中粘贴打开
+                        </div>
+                    </div>
+                    <div class="fallback-method">
+                        <div class="fallback-method-num">2</div>
+                        <div class="fallback-method-text">
+                            <strong>直接在浏览器打开</strong><br>
+                            点击下方按钮尝试在新窗口中打开
+                        </div>
+                    </div>
+                    <div class="fallback-method">
+                        <div class="fallback-method-num">3</div>
+                        <div class="fallback-method-text">
+                            <strong>扫描二维码</strong><br>
+                            使用微信扫描停车场现场的二维码
+                        </div>
+                    </div>
+                </div>
+                <div class="fallback-actions">
+                    <button class="fallback-btn fallback-btn-primary" onclick="copyPayLink()">
+                        📋 复制缴费链接（到微信中打开）
+                    </button>
+                    <button class="fallback-btn fallback-btn-secondary" onclick="openInNewTab()">
+                        🌐 在新窗口中打开
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自定义车牌键盘 -->
+    <div class="keyboard-overlay" id="keyboard">
+        <div class="keyboard-header">
+            <span></span>
+            <button class="keyboard-done" onclick="hideKeyboard()">完成</button>
+        </div>
+        <div class="keyboard-grid province" id="provinceKeyboard">
+            <!-- 省份键盘 -->
+        </div>
+        <div class="keyboard-grid alphanumeric" id="alphanumericKeyboard" style="display:none;">
+            <!-- 字母数字键盘 -->
+        </div>
+    </div>
+
+    <script>
+        // ============ 配置 ============
+        const PARK_CONFIG = {
+            park_id: '220624135007845824771448',
+            park_name: '武汉依云华府',
+            tel: '027-65563560',
+            base_url: 'https://cmpark.cmpo1914.com'
+        };
+
+        // 省份简称
+        const PROVINCES = [
+            '京','津','沪','渝','冀','豫','云','辽','黑','湘',
+            '皖','鲁','新','苏','浙','赣','鄂','桂','甘','晋',
+            '蒙','陕','吉','闽','贵','粤','川','青','藏','琼','宁'
+        ];
+
+        // 字母（去掉I和O）
+        const LETTERS = 'ABCDEFGHJKLMNPQRSTUVWXYZ'.split('');
+
+        // 数字
+        const DIGITS = '0123456789'.split('');
+
+        let currentPlateType = 'blue'; // blue 或 green
+        let currentPlate = '';
+        let keyboardMode = 'province'; // province 或 alphanumeric
+
+        // ============ 初始化 ============
+        function init() {
+            renderProvinceKeyboard();
+            renderAlphanumericKeyboard();
+            loadSavedPlates();
+        }
+
+        // ============ 车牌类型切换 ============
+        function setPlateType(type) {
+            currentPlateType = type;
+            document.querySelectorAll('.plate-type-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.type === type);
+            });
+            // 如果当前车牌长度超过7位且切换为普通车牌，截断
+            if (type === 'blue' && currentPlate.length > 7) {
+                currentPlate = currentPlate.substring(0, 7);
+                updatePlateDisplay();
+            }
+        }
+
+        // ============ 键盘渲染 ============
+        function renderProvinceKeyboard() {
+            const container = document.getElementById('provinceKeyboard');
+            let html = '';
+            PROVINCES.forEach(p => {
+                html += `<div class="key" onclick="inputKey('${p}')">${p}</div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function renderAlphanumericKeyboard() {
+            const container = document.getElementById('alphanumericKeyboard');
+            let html = '';
+
+            // 第一行：数字
+            DIGITS.forEach(d => {
+                html += `<div class="key" onclick="inputKey('${d}')">${d}</div>`;
+            });
+
+            // 第二行：字母 A-J (去掉I)
+            'ABCDEFGHJ'.split('').forEach(l => {
+                html += `<div class="key" onclick="inputKey('${l}')">${l}</div>`;
+            });
+            html += `<div class="key delete" onclick="deleteKey()">⌫</div>`;
+
+            // 第三行：字母 K-T
+            'JKLMNPQRST'.split('').forEach(l => {
+                html += `<div class="key" onclick="inputKey('${l}')">${l}</div>`;
+            });
+            html += `<div class="key delete" onclick="deleteKey()">⌫</div>`;
+
+            // 第四行：字母 U-Z
+            'UVWXYZ'.split('').forEach(l => {
+                html += `<div class="key" onclick="inputKey('${l}')">${l}</div>`;
+            });
+            if (currentPlateType === 'green') {
+                html += `<div class="key new-energy wide" onclick="inputKey('D')">新能源</div>`;
+            } else {
+                html += `<div class="key" style="visibility:hidden;"></div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // ============ 键盘操作 ============
+        function showKeyboard() {
+            const keyboard = document.getElementById('keyboard');
+            keyboard.classList.add('visible');
+            if (currentPlate.length === 0) {
+                keyboardMode = 'province';
+                document.getElementById('provinceKeyboard').style.display = 'grid';
+                document.getElementById('alphanumericKeyboard').style.display = 'none';
+            } else {
+                keyboardMode = 'alphanumeric';
+                document.getElementById('provinceKeyboard').style.display = 'none';
+                document.getElementById('alphanumericKeyboard').style.display = 'grid';
+            }
+        }
+
+        function hideKeyboard() {
+            document.getElementById('keyboard').classList.remove('visible');
+        }
+
+        function inputKey(key) {
+            const maxLen = currentPlateType === 'green' ? 8 : 7;
+            if (currentPlate.length >= maxLen) return;
+
+            currentPlate += key;
+            updatePlateDisplay();
+
+            // 第一个字符输入后切换到字母数字键盘
+            if (currentPlate.length === 1) {
+                keyboardMode = 'alphanumeric';
+                document.getElementById('provinceKeyboard').style.display = 'none';
+                document.getElementById('alphanumericKeyboard').style.display = 'grid';
+            }
+
+            // 达到最大长度自动收起键盘
+            if (currentPlate.length >= maxLen) {
+                setTimeout(() => hideKeyboard(), 200);
+            }
+        }
+
+        function deleteKey() {
+            if (currentPlate.length === 0) return;
+            currentPlate = currentPlate.slice(0, -1);
+            updatePlateDisplay();
+
+            // 删到只剩省份时切回省份键盘
+            if (currentPlate.length === 0) {
+                keyboardMode = 'province';
+                document.getElementById('provinceKeyboard').style.display = 'grid';
+                document.getElementById('alphanumericKeyboard').style.display = 'none';
+            }
+        }
+
+        function clearPlate() {
+            currentPlate = '';
+            updatePlateDisplay();
+        }
+
+        function updatePlateDisplay() {
+            const input = document.getElementById('plateInput');
+            const clearBtn = document.getElementById('clearBtn');
+            input.value = currentPlate;
+            clearBtn.classList.toggle('visible', currentPlate.length > 0);
+        }
+
+        // ============ 保存车牌 ============
+        function loadSavedPlates() {
+            const saved = JSON.parse(localStorage.getItem('saved_plates') || '[]');
+            renderSavedPlates(saved);
+        }
+
+        function renderSavedPlates(plates) {
+            const container = document.getElementById('savedPlatesList');
+            if (plates.length === 0) {
+                container.innerHTML = '<div class="add-plate-tag" onclick="hideKeyboard()">暂无保存车牌</div>';
+                return;
+            }
+            let html = '';
+            plates.forEach(plate => {
+                html += `<div class="saved-plate-tag" onclick="selectPlate('${plate}')">${plate}</div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function selectPlate(plate) {
+            currentPlate = plate;
+            updatePlateDisplay();
+            // 判断车牌类型
+            if (plate.length > 7) {
+                setPlateType('green');
+            } else {
+                setPlateType('blue');
+            }
+        }
+
+        function savePlate(plate) {
+            let saved = JSON.parse(localStorage.getItem('saved_plates') || '[]');
+            // 去重
+            saved = saved.filter(p => p !== plate);
+            saved.unshift(plate);
+            // 最多保存5个
+            if (saved.length > 5) saved = saved.slice(0, 5);
+            localStorage.setItem('saved_plates', JSON.stringify(saved));
+            renderSavedPlates(saved);
+        }
+
+        // ============ 查询停车费 ============
+        function queryParkingFee() {
+            const plate = currentPlate.trim().toUpperCase();
+            if (!plate) {
+                showToast('请输入车牌号码');
+                return;
+            }
+
+            if (plate.length < 7) {
+                showToast('请输入完整的车牌号码');
+                return;
+            }
+
+            // 保存车牌到常用
+            savePlate(plate);
+
+            // 显示加载
+            document.getElementById('loading').classList.add('visible');
+            document.getElementById('resultSection').classList.remove('visible');
+            document.getElementById('queryBtn').disabled = true;
+
+            // 构建跳转URL（直接跳转到缴费页面，带上车牌参数）
+            // CM PARK 的缴费页面URL格式
+            const payUrl = `${PARK_CONFIG.base_url}/wx/#/pages/payment/index?park_id=${PARK_CONFIG.park_id}&park_name=${encodeURIComponent(PARK_CONFIG.park_name)}&is_scan=1&is_flag=0&tel=${encodeURIComponent(PARK_CONFIG.tel)}&plate=${encodeURIComponent(plate)}`;
+
+            // 尝试通过API查询费用信息
+            // 由于CM PARK的API需要鉴权，这里我们提供两种方式：
+            // 1. 直接跳转到缴费页面
+            // 2. 尝试调用API（如果可用）
+
+            // 先尝试API查询
+            tryQueryAPI(plate);
+        }
+
+        async function tryQueryAPI(plate) {
+            try {
+                // 尝试调用CM PARK的查询接口
+                // 注意：实际API可能需要鉴权token，这里尝试常见的接口格式
+                const apiUrl = `${PARK_CONFIG.base_url}/api/park/queryFee`;
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        parkId: PARK_CONFIG.park_id,
+                        plateNumber: plate
+                    }),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.code === 0 || data.code === 200) {
+                        showResult(data, plate);
+                        return;
+                    }
+                }
+            } catch (e) {
+                // API调用失败，提供跳转方案
+                console.log('API查询失败，提供跳转方案', e);
+            }
+
+            // API不可用时，提供直接跳转方案
+            showFallbackResult(plate);
+        }
+
+        function showResult(data, plate) {
+            document.getElementById('loading').classList.remove('visible');
+            document.getElementById('queryBtn').disabled = false;
+
+            const resultSection = document.getElementById('resultSection');
+            resultSection.innerHTML = `
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-plate">${plate}</div>
+                        <div class="result-status">🚗 停车中</div>
+                    </div>
+                    <div class="result-body">
+                        <div class="result-row">
+                            <span class="result-row-label">停车场</span>
+                            <span class="result-row-value">${PARK_CONFIG.park_name}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-row-label">入场时间</span>
+                            <span class="result-row-value">${data.entryTime || '--'}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-row-label">停车时长</span>
+                            <span class="result-row-value">${data.duration || '--'}</span>
+                        </div>
+                    </div>
+                    <div class="result-fee">
+                        <div class="result-fee-label">应付金额</div>
+                        <div class="result-fee-amount">¥${(data.fee || 0).toFixed(2)}<span class="unit">元</span></div>
+                        <button class="pay-btn" onclick="goToPay('${plate}')">立即缴费</button>
+                    </div>
+                </div>
+            `;
+            resultSection.classList.add('visible');
+        }
+
+        function showFallbackResult(plate) {
+            document.getElementById('loading').classList.remove('visible');
+            document.getElementById('queryBtn').disabled = false;
+
+            const resultSection = document.getElementById('resultSection');
+            resultSection.innerHTML = `
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-plate">${plate}</div>
+                        <div class="result-status">📋 待查询</div>
+                    </div>
+                    <div class="result-body">
+                        <div class="result-row">
+                            <span class="result-row-label">停车场</span>
+                            <span class="result-row-value">${PARK_CONFIG.park_name}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-row-label">车牌号</span>
+                            <span class="result-row-value">${plate}</span>
+                        </div>
+                    </div>
+                    <div style="padding: 16px 20px; text-align: center;">
+                        <p style="font-size: 14px; color: #666; margin-bottom: 16px; line-height: 1.6;">
+                            点击下方按钮跳转到缴费页面<br>即可查看详细费用并完成缴费
+                        </p>
+                        <button class="pay-btn" onclick="goToPay('${plate}')">
+                            🚀 前往缴费页面
+                        </button>
+                    </div>
+                </div>
+            `;
+            resultSection.classList.add('visible');
+        }
+
+        let currentPayUrl = '';
+
+        function goToPay(plate) {
+            // 构建CM PARK缴费页面URL
+            currentPayUrl = `${PARK_CONFIG.base_url}/wx/#/pages/payment/index?park_id=${PARK_CONFIG.park_id}&park_name=${encodeURIComponent(PARK_CONFIG.park_name)}&is_scan=1&is_flag=0&tel=${encodeURIComponent(PARK_CONFIG.tel)}`;
+
+            // 显示 iframe 覆盖层
+            const overlay = document.getElementById('payOverlay');
+            const iframe = document.getElementById('payIframe');
+            const loading = document.getElementById('payLoading');
+            const fallback = document.getElementById('iframeFallback');
+
+            overlay.classList.add('visible');
+            loading.classList.remove('hidden');
+            fallback.classList.remove('visible');
+            iframe.style.display = 'block';
+
+            // 加载 iframe
+            iframe.src = currentPayUrl;
+
+            // 8秒超时：如果iframe还没加载成功，显示备用方案
+            setTimeout(() => {
+                if (!loading.classList.contains('hidden')) {
+                    showIframeFallback();
+                }
+            }, 8000);
+        }
+
+        function onIframeLoad() {
+            const loading = document.getElementById('payLoading');
+            const iframe = document.getElementById('payIframe');
+
+            // 隐藏加载动画
+            loading.classList.add('hidden');
+
+            // 检测 iframe 是否真正加载了内容
+            try {
+                const doc = iframe.contentDocument || iframe.contentWindow.document;
+                // 如果能访问到文档且内容为空，说明加载失败
+                if (doc && doc.body && doc.body.innerHTML.trim() === '') {
+                    showIframeFallback();
+                }
+            } catch (e) {
+                // 跨域无法访问，说明iframe可能加载了内容，保持显示
+                // 但如果是在非微信环境，可能显示空白
+                // 给一个延迟检测
+                setTimeout(() => {
+                    try {
+                        const doc = iframe.contentDocument || iframe.contentWindow.document;
+                        if (!doc || !doc.body || doc.body.innerHTML.trim() === '') {
+                            showIframeFallback();
+                        }
+                    } catch (e2) {
+                        // 跨域但可能已加载，保持iframe显示
+                    }
+                }, 2000);
+            }
+        }
+
+        function onIframeError() {
+            showIframeFallback();
+        }
+
+        function showIframeFallback() {
+            const loading = document.getElementById('payLoading');
+            const fallback = document.getElementById('iframeFallback');
+            const iframe = document.getElementById('payIframe');
+
+            loading.classList.add('hidden');
+            iframe.style.display = 'none';
+            fallback.classList.add('visible');
+        }
+
+        function closePayOverlay() {
+            const overlay = document.getElementById('payOverlay');
+            const iframe = document.getElementById('payIframe');
+            const loading = document.getElementById('payLoading');
+            const fallback = document.getElementById('iframeFallback');
+
+            overlay.classList.remove('visible');
+            iframe.src = '';
+            loading.classList.remove('hidden');
+            fallback.classList.remove('visible');
+        }
+
+        function copyPayLink() {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(currentPayUrl).then(() => {
+                    showToast('✅ 链接已复制，请到微信中粘贴打开');
+                }).catch(() => {
+                    fallbackCopy(currentPayUrl);
+                });
+            } else {
+                fallbackCopy(currentPayUrl);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('✅ 链接已复制，请到微信中粘贴打开');
+            } catch (e) {
+                showToast('复制失败，请手动复制链接');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function openInNewTab() {
+            window.open(currentPayUrl, '_blank');
+        }
+
+        // ============ Toast 提示 ============
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0,0,0,0.75);
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-size: 14px;
+                z-index: 9999;
+                animation: fadeIn 0.2s;
+            `;
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }
+
+        // ============ 启动 ============
+        init();
+    </script>
+</body>
+</html>
